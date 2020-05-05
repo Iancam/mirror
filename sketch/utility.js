@@ -51,6 +51,10 @@ function pointFrom(angle, length, start) {
   return [start[0] + length * cos(angle), start[1] + length * sin(angle)];
 }
 
+function lineFromVector(vector, length) {
+  return [...pointFrom(vector.angle, length, vector.pt), ...vector.pt];
+}
+
 function lerp(v0, v1, t) {
   return v0 * (1 - t) + v1 * t;
 }

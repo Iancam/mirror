@@ -55,7 +55,7 @@ class GestureField extends rbush {
             pt: pointFrom(normal, this.range, pt),
             angle: angle,
           };
-          debug.push(["l", [...pt, ...sectLine.pt]]);
+          debug.push(["l", lineFromVector(sectLine, this.range)]);
           const sectPt = getIntersection(vector, sectLine);
 
           const distance = sectPt ? dist(...sectPt, ...vector.pt) : Infinity;

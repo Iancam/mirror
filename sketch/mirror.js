@@ -29,8 +29,6 @@ function draw() {
         point(...v);
       },
       l: (v) => {
-        console.log(v);
-
         strokeWeight(1);
         stroke("cyan");
         line(...v);
