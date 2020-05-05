@@ -44,6 +44,35 @@ class GestureField extends rbush {
     return dist(...nearest[0].pt, ...pt);
   }
 
+  getIntersection(vector) {
+    const nearest = this.find(vector.pt);
+    if (nearest) {
+      const [sectPt, dst] = knn(this, ...vector.pt, 4).reduce(
+        ([minPt, dst], { pt, angle }) => {
+          const normal =
+            shortestAngle(vector.angle, angle) > 0 ? angle + 90 : angle - 90;
+          const sectLine = {
+            pt: pointFrom(normal, this.range, pt),
+            angle: angle,
+          };
+          debug.push(["l", [...pt, ...sectLine.pt]]);
+          const sectPt = getIntersection(vector, sectLine);
+
+          const distance = sectPt ? dist(...sectPt, ...vector.pt) : Infinity;
+          // console.log(sectPt, distance);
+          return distance < dst ? [sectPt, distance] : [minPt, dst];
+        },
+        [null, Infinity]
+      );
+
+      strokeWeight(10);
+      stroke(255, 255, 100);
+      // sectPt && debug.push(["p", sectPt]); // && point(...sectPt);
+      strokeWeight(1);
+      return sectPt;
+    }
+  }
+
   last() {
     const index =
       this.windowIndex - 1 < 0 ? this.window.length - 1 : this.windowIndex - 1;

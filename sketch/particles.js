@@ -16,7 +16,11 @@ class Particle {
   pathForParticle(gestureField) {
     if (this.trajectory) return this.trajectory;
     const maxAngle = 120;
+    const sectPt = gestureField.getIntersection(this);
+    // console.log(sectPt);
+
     const nearest = gestureField.find(this.pt);
+
     if (nearest) {
       const main1 = this.pt;
       const handle1 = pointFrom(this.angle, this.speed, this.pt);
@@ -34,7 +38,7 @@ class Particle {
       );
       this.t = 0;
       const d = this.trajectory.length();
-      this.steps = Math.floor((d * 5) / this.speed / 5);
+      this.steps = Math.floor(d / this.speed);
     } else {
       this.clearTrajectory();
     }
@@ -79,10 +83,10 @@ class Particle {
     }
     if (this.trajectory) {
       const { x, y } = this.trajectory.get(this.t++ / this.steps);
-      const { x: dx, y: dy } = this.trajectory.derivative(this.t / this.steps);
+      // const { x: dx, y: dy } = this.trajectory.derivative(this.t / this.steps);
 
-      let newAngle = getAngle([x, y], [dx, dy]);
-      // newAngle = getAngle(this.pt, [x, y]);
+      // let newAngle = getAngle([x, y], [dx, dy]);
+      const newAngle = getAngle(this.pt, [x, y]);
       this.pt = [x, y];
       this.angle = newAngle;
       return [this];

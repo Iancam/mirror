@@ -7,15 +7,38 @@ function setup() {
 
 let depth = 10;
 let particles = [];
-let gesture = new GestureField(10);
 let gestDist = 10;
+let gesture = new GestureField(gestDist);
+let debug = [];
 let dragged = false;
 let freeze = false;
 function draw() {
   if (freeze) {
     return;
   }
+  stroke(255, 255, 100);
+  strokeWeight(1);
+
   background(0);
+
+  debug.forEach(([call, vals]) => {
+    // console.log(vals);
+    const op = {
+      p: (v) => {
+        strokeWeight(15);
+        point(...v);
+      },
+      l: (v) => {
+        console.log(v);
+
+        strokeWeight(1);
+        stroke("cyan");
+        line(...v);
+      },
+    }[call](vals);
+    // point(...pt);
+  });
+  strokeWeight(1);
   stroke(255, 0, 255);
   gesture.all().forEach(({ pt, angle }) => {
     circle(...pt, gesture.range);
@@ -52,7 +75,7 @@ function mouseReleased() {
   console.log("sweet release");
   if (!dragged) gesture = new GestureField(10);
   dragged = false;
-
+  debug = [];
   gesture.clearWindow();
 }
 
