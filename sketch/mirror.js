@@ -5,6 +5,16 @@ function setup() {
   stroke(255, 255, 255);
 }
 
+const drawParticle = (all) => (newParticle) => {
+  const { angle, length, pt } = newParticle;
+  const bez = newParticle.pathForParticle(gesture);
+  stroke(255, 0, 255);
+  bez && bez.getLUT(5).forEach(({ x, y }) => circle(x, y, 2));
+  stroke(255, 255, 255);
+  line(...pt, ...pointFrom(angle, length, pt));
+  all.push(newParticle);
+};
+
 let depth = 10;
 let particles = [];
 let gestDist = 10;
@@ -12,6 +22,7 @@ let gesture = new GestureField(gestDist);
 let debug = [];
 let dragged = false;
 let freeze = false;
+
 function draw() {
   if (freeze) {
     return;
@@ -20,22 +31,31 @@ function draw() {
   strokeWeight(1);
 
   background(0);
-
-  debug.forEach(([call, vals]) => {
+  const debugFx = (all, thing) => {
+    const [call, vals, opts] = thing;
     // console.log(vals);
+    const timedOut =
+      opts && opts.ttl && opts.tstamp && new Date() - opts.tstamp > opts.ttl;
+    if (timedOut) {
+      return all;
+    }
     const op = {
-      p: (v) => {
-        strokeWeight(15);
+      p: (v, opts = { color: "yellow" }) => {
+        stroke(opts.color);
+        strokeWeight(10);
         point(...v);
       },
-      l: (v) => {
+      l: (v, opts = { color: "cyan" }) => {
         strokeWeight(1);
-        stroke("cyan");
+        stroke(opts.color);
         line(...v);
       },
-    }[call](vals);
+    }[call](vals, opts);
+    all.push(thing);
+    return all;
     // point(...pt);
-  });
+  };
+  debug = debug.reduce(debugFx, []);
   strokeWeight(1);
   stroke(255, 0, 255);
   gesture.all().forEach(({ pt, angle }) => {
@@ -46,15 +66,7 @@ function draw() {
   particles = particles.reduce((all, particle) => {
     const newParticles = particle.update(gesture);
 
-    newParticles.forEach((newParticle) => {
-      const { angle, length, pt } = newParticle;
-      const bez = newParticle.pathForParticle(gesture);
-      stroke(255, 0, 255);
-      bez && bez.getLUT(5).forEach(({ x, y }) => circle(x, y, 2));
-      stroke(255, 255, 255);
-      line(...pt, ...pointFrom(angle, length, pt));
-      all.push(newParticle);
-    });
+    newParticles.forEach(drawParticle(all));
 
     return all;
   }, []);
@@ -64,8 +76,8 @@ function mouseDragged() {
   dragged = true;
   const pt = [mouseX, mouseY];
   const added = gesture.add(pt);
-  if (typeof added.angle === "number") {
-    times(randInt(3, 5), () => particles.push(new Particle(pt, added.angle)));
+  if (typeof added.angle === "number" && particles.length < 2) {
+    particles.push(new Particle(pt, added.angle));
   }
 }
 

@@ -45,32 +45,37 @@ class GestureField extends rbush {
   }
 
   getIntersection(vector) {
-    const nearest = this.find(vector.pt);
-    if (nearest) {
-      const [sectPt, dst] = knn(this, ...vector.pt, 4).reduce(
-        ([minPt, dst], { pt, angle }) => {
-          const normal =
-            shortestAngle(vector.angle, angle) > 0 ? angle + 90 : angle - 90;
-          const sectLine = {
-            pt: pointFrom(normal, this.range, pt),
-            angle: angle,
-          };
-          debug.push(["l", lineFromVector(sectLine, this.range)]);
-          const sectPt = getIntersection(vector, sectLine);
+    const [sectPt, dst] = knn(this, ...vector.pt, 4).reduce(
+      ([minPt, dst], { pt, angle }) => {
+        const normal =
+          shortestAngle(vector.angle, angle) < 0 ? angle + 90 : angle - 90;
+        const sectLine = {
+          pt: pointFrom(normal, this.range, pt),
+          angle: angle,
+        };
 
-          const distance = sectPt ? dist(...sectPt, ...vector.pt) : Infinity;
-          // console.log(sectPt, distance);
-          return distance < dst ? [sectPt, distance] : [minPt, dst];
-        },
-        [null, Infinity]
-      );
+        const sline = lineFromVector(sectLine, this.range * 2);
+        const vline = lineFromVector(vector, this.range * 2);
+        const sectPt = intersect(...sline, ...vline);
+        !sectPt && debug.push(["p", sline, { color: "cyan" }]);
+        !sectPt && debug.push(["p", [sline[2], sline[3]], { color: "blue" }]);
+        debug.push(["l", sline, { color: "blue" }]);
 
-      strokeWeight(10);
-      stroke(255, 255, 100);
-      // sectPt && debug.push(["p", sectPt]); // && point(...sectPt);
-      strokeWeight(1);
-      return sectPt;
-    }
+        !sectPt &&
+          debug.push([
+            "l",
+            vline,
+            { color: "cyan", ttl: "500", tstamp: new Date() },
+          ]);
+        sectPt && debug.push(["p", sectPt]);
+
+        const distance = sectPt ? dist(...sectPt, ...vector.pt) : Infinity;
+        return distance < dst ? [sectPt, distance] : [minPt, dst];
+      },
+      [null, Infinity]
+    );
+
+    return sectPt;
   }
 
   last() {

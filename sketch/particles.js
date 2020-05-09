@@ -17,7 +17,6 @@ class Particle {
     if (this.trajectory) return this.trajectory;
     const maxAngle = 120;
     const sectPt = gestureField.getIntersection(this);
-    // console.log(sectPt);
 
     const nearest = gestureField.find(this.pt);
 
