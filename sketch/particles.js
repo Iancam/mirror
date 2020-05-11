@@ -15,32 +15,23 @@ class Particle {
 
   pathForParticle(gestureField) {
     if (this.trajectory) return this.trajectory;
-    const maxAngle = 120;
-    const sectPt = gestureField.getIntersection(this);
 
-    const nearest = gestureField.find(this.pt);
+    const intersection = gestureField.getIntersection(this);
+    if (intersection) {
+      const { pt: sectPt, sectVect } = intersection;
+      if (sectPt) {
+        const end = pointFrom(sectVect.angle, 15, sectPt);
+        this.trajectory = new Bezier(...this.pt, ...sectPt, ...end);
 
-    if (nearest) {
-      const main1 = this.pt;
-      const handle1 = pointFrom(this.angle, this.speed, this.pt);
-      let nextPoint = pointFrom(this.angle, this.speed * 5, nearest.pt);
-      const handle2 = pointFrom(nearest.angle, this.speed * 15, nearest.pt);
-      if (Math.abs(nearest.angle - this.angle) > maxAngle) {
-        // console.log("ding");
+        this.t = 0;
+        const d = this.trajectory.length();
+
+        this.steps = Math.floor(d / this.speed);
+      } else {
+        this.clearTrajectory();
       }
-      // bezier(...main1, ...handle1, ...nextPoint, ...handle2);
-      this.trajectory = new Bezier(
-        ...handle1,
-        ...main1,
-        ...nextPoint,
-        ...handle2
-      );
-      this.t = 0;
-      const d = this.trajectory.length();
-      this.steps = Math.floor(d / this.speed);
-    } else {
-      this.clearTrajectory();
     }
+
     return this.trajectory;
   }
 
@@ -76,7 +67,7 @@ class Particle {
   }
 
   update(gestureField) {
-    const { angle, length, speed, pt, life } = this;
+    const { angle, length, speed, pt } = this;
     if (this.t > this.steps) {
       this.clearTrajectory();
     }

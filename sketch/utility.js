@@ -32,6 +32,12 @@ function getIntersection(
   return pti;
 }
 
+function dWindow(array, windowSize, callback) {
+  for (let i = windowSize; i < array.length; i++) {
+    callback(array.slice(i - windowSize, i));
+  }
+}
+
 function getAngle(p1, p2) {
   const angle =
     ((Math.atan2(p2[1] - p1[1], p2[0] - p1[0]) * 180) / Math.PI) % 360;
@@ -47,6 +53,12 @@ function last(array) {
   return array[array.length - 1];
 }
 
+function intersectInfinite(x1, y1, x2, y2, x3, y3, x4, y4) {
+  const xt = (x1 * y1 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4);
+  const b = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  const yt = (x1 * y1 - y1 * x2) * (x3 - x4) - (y1 - y2) * (x3 * y4 - y3 * x4);
+  return [xt / b, yt / b];
+}
 function intersect(x1, y1, x2, y2, x3, y3, x4, y4) {
   let x, y;
   let a1, a2, b1, b2, c1, c2;
@@ -125,6 +137,12 @@ function lerp(v0, v1, t) {
 
 function shortestAngle(start, end) {
   return ((((end - start) % 360) + 540) % 360) - 180;
+}
+
+function isBetween(start, end, mid) {
+  end = end - start < 0.0 ? end - start + 360.0 : end - start;
+  mid = mid - start < 0.0 ? mid - start + 360.0 : mid - start;
+  return mid < end;
 }
 
 function lerpAngle(start, end, ratio) {

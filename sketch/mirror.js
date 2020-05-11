@@ -8,8 +8,8 @@ function setup() {
 const drawParticle = (all) => (newParticle) => {
   const { angle, length, pt } = newParticle;
   const bez = newParticle.pathForParticle(gesture);
-  stroke(255, 0, 255);
-  bez && bez.getLUT(5).forEach(({ x, y }) => circle(x, y, 2));
+  stroke(100, 0, 255);
+  bez && bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
   stroke(255, 255, 255);
   line(...pt, ...pointFrom(angle, length, pt));
   all.push(newParticle);
@@ -17,11 +17,12 @@ const drawParticle = (all) => (newParticle) => {
 
 let depth = 10;
 let particles = [];
-let gestDist = 10;
+let gestDist = 5;
 let gesture = new GestureField(gestDist);
 let debug = [];
 let dragged = false;
 let freeze = false;
+let maxParticles = 100;
 
 function draw() {
   if (freeze) {
@@ -58,9 +59,16 @@ function draw() {
   debug = debug.reduce(debugFx, []);
   strokeWeight(1);
   stroke(255, 0, 255);
+
   gesture.all().forEach(({ pt, angle }) => {
-    circle(...pt, gesture.range);
+    circle(...pt, gesture.range - 10);
     line(...pt, ...pointFrom(angle, gestDist, pt));
+  });
+  stroke("white");
+  gesture.walls.forEach((wall) => {
+    if (wall.length > 2) {
+      dWindow(wall, 2, ([p1, p2]) => line(...p1, ...p2));
+    }
   });
   stroke(255, 255, 255);
   particles = particles.reduce((all, particle) => {
@@ -76,16 +84,20 @@ function mouseDragged() {
   dragged = true;
   const pt = [mouseX, mouseY];
   const added = gesture.add(pt);
-  if (typeof added.angle === "number" && particles.length < 2) {
+  if (typeof added.angle === "number" && particles.length < maxParticles) {
     particles.push(new Particle(pt, added.angle));
   }
 }
 
 function mouseReleased() {
   console.log("sweet release");
-  if (!dragged) gesture = new GestureField(10);
+  if (!dragged) {
+    gesture = new GestureField(10);
+    particles = [];
+  }
   dragged = false;
   debug = [];
+
   gesture.clearWindow();
 }
 

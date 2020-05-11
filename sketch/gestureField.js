@@ -9,6 +9,7 @@ class GestureField extends rbush {
     this.window = [null, null, null];
     this.windowIndex = 0;
     this.count = 0;
+    this.walls = [[], []];
   }
   clearWindow() {
     this.window = [null, null, null];
@@ -27,6 +28,11 @@ class GestureField extends rbush {
       this.windowIndex = (this.windowIndex + 1) % this.window.length;
 
       this.insert(newPoint);
+
+      [angle + 90, angle - 90].forEach((normal, i) =>
+        this.walls[i].push(pointFrom(normal, this.range, point))
+      );
+
       this.count += 1;
       return newPoint;
     }
@@ -45,37 +51,24 @@ class GestureField extends rbush {
   }
 
   getIntersection(vector) {
-    const [sectPt, dst] = knn(this, ...vector.pt, 4).reduce(
-      ([minPt, dst], { pt, angle }) => {
-        const normal =
-          shortestAngle(vector.angle, angle) < 0 ? angle + 90 : angle - 90;
-        const sectLine = {
-          pt: pointFrom(normal, this.range, pt),
-          angle: angle,
-        };
+    for (let wall of this.walls) {
+      if (wall.length < 2) {
+        return null;
+      }
+      let ret = undefined;
+      dWindow(wall, 2, ([lst, curr]) => {
+        const [a1, a2] = [lst, curr].map((pt) => getAngle(vector.pt, pt));
+        if (isBetween(a2, a1, vector.angle)) {
+          // this is the line!
+          const pointer = pointFrom(vector.angle, 10, vector.pt);
+          const sectPt = intersect(...lst, ...curr, ...vector.pt, ...pointer);
+          ret = sectPt;
+        }
+      });
+      ret && debug.push(["p", ret, { color: "yellow" }]);
 
-        const sline = lineFromVector(sectLine, this.range * 2);
-        const vline = lineFromVector(vector, this.range * 2);
-        const sectPt = intersect(...sline, ...vline);
-        !sectPt && debug.push(["p", sline, { color: "cyan" }]);
-        !sectPt && debug.push(["p", [sline[2], sline[3]], { color: "blue" }]);
-        debug.push(["l", sline, { color: "blue" }]);
-
-        !sectPt &&
-          debug.push([
-            "l",
-            vline,
-            { color: "cyan", ttl: "500", tstamp: new Date() },
-          ]);
-        sectPt && debug.push(["p", sectPt]);
-
-        const distance = sectPt ? dist(...sectPt, ...vector.pt) : Infinity;
-        return distance < dst ? [sectPt, distance] : [minPt, dst];
-      },
-      [null, Infinity]
-    );
-
-    return sectPt;
+      return ret;
+    }
   }
 
   last() {
