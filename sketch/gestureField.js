@@ -1,6 +1,4 @@
-// gestureField.js;
-
-// { pt, angle: lGest ? getAngle(lGest.pt, pt) : null };
+let ping = 0;
 class GestureField extends rbush {
   constructor(minDistance, range = 20) {
     super();
@@ -51,24 +49,30 @@ class GestureField extends rbush {
   }
 
   getIntersection(vector) {
-    for (let wall of this.walls) {
+    return this.walls.map((wall) => {
       if (wall.length < 2) {
         return null;
       }
       let ret = undefined;
       dWindow(wall, 2, ([lst, curr]) => {
         const [a1, a2] = [lst, curr].map((pt) => getAngle(vector.pt, pt));
-        if (isBetween(a2, a1, vector.angle)) {
+        const ordered =
+          ((((a1 - a2) % 360) + 540) % 360) - 180 <
+          ((((a2 - a1) % 360) + 540) % 360) - 180
+            ? [a1, a2]
+            : [a2, a1];
+        const between = isBetween(...ordered, vector.angle);
+        if (between) {
           // this is the line!
-          const pointer = pointFrom(vector.angle, 10, vector.pt);
+          const pointer = pointFrom(vector.angle, 100, vector.pt);
           const sectPt = intersect(...lst, ...curr, ...vector.pt, ...pointer);
           ret = sectPt;
         }
       });
-      ret && debug.push(["p", ret, { color: "yellow" }]);
+      ret && debug.push(["p", ret, { color: "yellow", weight: 3 }]);
 
       return ret;
-    }
+    })[0];
   }
 
   last() {

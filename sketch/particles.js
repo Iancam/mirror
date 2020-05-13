@@ -18,6 +18,8 @@ class Particle {
 
     const intersection = gestureField.getIntersection(this);
     if (intersection) {
+      // console.log(intersection);
+
       const { pt: sectPt, sectVect } = intersection;
       if (sectPt) {
         const end = pointFrom(sectVect.angle, 15, sectPt);

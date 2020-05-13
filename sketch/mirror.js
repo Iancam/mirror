@@ -17,7 +17,7 @@ const drawParticle = (all) => (newParticle) => {
 
 let depth = 10;
 let particles = [];
-let gestDist = 5;
+let gestDist = 20;
 let gesture = new GestureField(gestDist);
 let debug = [];
 let dragged = false;
@@ -41,13 +41,13 @@ function draw() {
       return all;
     }
     const op = {
-      p: (v, opts = { color: "yellow" }) => {
+      p: (v, opts = { color: "yellow", weight: 10 }) => {
         stroke(opts.color);
-        strokeWeight(10);
+        strokeWeight(opts.weight);
         point(...v);
       },
-      l: (v, opts = { color: "cyan" }) => {
-        strokeWeight(1);
+      l: (v, opts = { color: "cyan", weight: 1 }) => {
+        strokeWeight(opts.weight);
         stroke(opts.color);
         line(...v);
       },
@@ -90,13 +90,12 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-  console.log("sweet release");
   if (!dragged) {
     gesture = new GestureField(10);
     particles = [];
   }
   dragged = false;
-  debug = [];
+  // debug = [];
 
   gesture.clearWindow();
 }
