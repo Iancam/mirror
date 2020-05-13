@@ -14,15 +14,23 @@ class Particle {
   }
 
   pathForParticle(gestureField) {
-    if (this.trajectory) return this.trajectory;
+    const inRange = gestureField.inRange(this.pt);
+    if (!inRange) {
+      this.clearTrajectory();
+    }
+    if (this.trajectory) {
+      return this.trajectory;
+    }
 
     const intersection = gestureField.getIntersection(this);
-    if (intersection) {
-      // console.log(intersection);
-
-      const { pt: sectPt, sectVect } = intersection;
+    if (inRange && intersection) {
+      const { pt: sectPt, angle: reflectionAngle } = intersection;
       if (sectPt) {
-        const end = pointFrom(sectVect.angle, 15, sectPt);
+        const dis = dist(...this.pt, ...sectPt);
+        const end = pointFrom(reflectionAngle, dis / 2, sectPt);
+
+        // console.log({ dis });
+
         this.trajectory = new Bezier(...this.pt, ...sectPt, ...end);
 
         this.t = 0;
@@ -32,6 +40,8 @@ class Particle {
       } else {
         this.clearTrajectory();
       }
+    } else {
+      this.clearTrajectory();
     }
 
     return this.trajectory;

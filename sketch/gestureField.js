@@ -48,31 +48,50 @@ class GestureField extends rbush {
     return dist(...nearest[0].pt, ...pt);
   }
 
-  getIntersection(vector) {
-    return this.walls.map((wall) => {
-      if (wall.length < 2) {
-        return null;
-      }
-      let ret = undefined;
-      dWindow(wall, 2, ([lst, curr]) => {
-        const [a1, a2] = [lst, curr].map((pt) => getAngle(vector.pt, pt));
-        const ordered =
-          ((((a1 - a2) % 360) + 540) % 360) - 180 <
-          ((((a2 - a1) % 360) + 540) % 360) - 180
-            ? [a1, a2]
-            : [a2, a1];
-        const between = isBetween(...ordered, vector.angle);
-        if (between) {
-          // this is the line!
-          const pointer = pointFrom(vector.angle, 100, vector.pt);
-          const sectPt = intersect(...lst, ...curr, ...vector.pt, ...pointer);
-          ret = sectPt;
-        }
-      });
-      ret && debug.push(["p", ret, { color: "yellow", weight: 3 }]);
+  inRange(pt) {
+    return !!this.find(pt);
+  }
 
-      return ret;
-    })[0];
+  getIntersection(vector) {
+    const sectPts = this.walls
+      .map((wall) => {
+        if (wall.length < 2) return null;
+        let ret = undefined;
+        dWindow(wall, 2, ([lst, curr]) => {
+          if (ret) return;
+          const [a1, a2] = [lst, curr].map((pt) => getAngle(vector.pt, pt));
+          const ordered =
+            shortestAngle(a1, a2) < shortestAngle(a2, a1) ? [a2, a1] : [a1, a2];
+          // console.log(ordered);
+
+          const between = isBetween(...ordered, vector.angle);
+          if (between) {
+            const pointer = pointFrom(vector.angle, 100, vector.pt);
+            const sectPt = intersect(...lst, ...curr, ...vector.pt, ...pointer);
+
+            const surfaceAngle = getAngle(lst, curr);
+            ret = {
+              pt: sectPt,
+              angle: reflectAngle(vector.angle, surfaceAngle),
+            };
+          }
+        });
+        return ret;
+      })
+      .filter((pt) => pt && pt.pt);
+    const closest =
+      sectPts.length < 1
+        ? undefined
+        : sectPts.reduce((min, curr) => {
+            const distance = dist(...curr.pt, ...vector.pt);
+            return min.distance > distance
+              ? {
+                  distance,
+                  ...curr,
+                }
+              : min;
+          });
+    return closest;
   }
 
   last() {
