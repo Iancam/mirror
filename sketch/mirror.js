@@ -9,7 +9,7 @@ const drawParticle = (all) => (newParticle) => {
   const { angle, length, pt } = newParticle;
   const bez = newParticle.pathForParticle(gesture);
   stroke(100, 0, 255);
-  bez && bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
+  drawBez && bez && bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
   stroke(255, 255, 255);
   line(...pt, ...pointFrom(angle, length, pt));
   all.push(newParticle);
@@ -20,9 +20,35 @@ let particles = [];
 let gestDist = 20;
 let gesture = new GestureField(gestDist);
 let debug = [];
+let maxParticles = 100;
+
 let dragged = false;
 let freeze = false;
-let maxParticles = 100;
+let drawBez = false;
+function debugFx(all, thing) {
+  const [call, vals, opts] = thing;
+  // console.log(vals);
+  const timedOut =
+    opts && opts.ttl && opts.tstamp && new Date() - opts.tstamp > opts.ttl;
+  if (timedOut) {
+    return all;
+  }
+  const op = {
+    p: (v, opts = { color: "yellow", weight: 10 }) => {
+      stroke(opts.color);
+      strokeWeight(opts.weight);
+      point(...v);
+    },
+    l: (v, opts = { color: "cyan", weight: 1 }) => {
+      strokeWeight(opts.weight);
+      stroke(opts.color);
+      line(...v);
+    },
+  }[call](vals, opts);
+  all.push(thing);
+  return all;
+  // point(...pt);
+}
 
 function draw() {
   if (freeze) {
@@ -32,36 +58,13 @@ function draw() {
   strokeWeight(1);
 
   background(0);
-  const debugFx = (all, thing) => {
-    const [call, vals, opts] = thing;
-    // console.log(vals);
-    const timedOut =
-      opts && opts.ttl && opts.tstamp && new Date() - opts.tstamp > opts.ttl;
-    if (timedOut) {
-      return all;
-    }
-    const op = {
-      p: (v, opts = { color: "yellow", weight: 10 }) => {
-        stroke(opts.color);
-        strokeWeight(opts.weight);
-        point(...v);
-      },
-      l: (v, opts = { color: "cyan", weight: 1 }) => {
-        strokeWeight(opts.weight);
-        stroke(opts.color);
-        line(...v);
-      },
-    }[call](vals, opts);
-    all.push(thing);
-    return all;
-    // point(...pt);
-  };
+
   debug = debug.reduce(debugFx, []);
   strokeWeight(1);
   stroke(255, 0, 255);
 
   gesture.all().forEach(({ pt, angle }) => {
-    circle(...pt, gesture.range - 10);
+    // circle(...pt, gesture.range - 10);
     line(...pt, ...pointFrom(angle, gestDist, pt));
   });
   stroke("white");
@@ -105,5 +108,8 @@ function keyPressed(params) {
     freeze = !freeze;
     return false;
   }
-  return false;
+  if (key === "d") {
+    drawBez = !drawBez;
+    return false;
+  }
 }

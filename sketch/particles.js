@@ -29,8 +29,6 @@ class Particle {
         const dis = dist(...this.pt, ...sectPt);
         const end = pointFrom(reflectionAngle, dis / 2, sectPt);
 
-        // console.log({ dis });
-
         this.trajectory = new Bezier(...this.pt, ...sectPt, ...end);
 
         this.t = 0;
