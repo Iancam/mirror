@@ -3,16 +3,17 @@ function setup() {
   angleMode(DEGREES);
   noFill();
   stroke(255, 255, 255);
+  background(0);
 }
 
-const drawParticle = (all) => (newParticle) => {
-  const { angle, length, pt } = newParticle;
-  const bez = newParticle.pathForParticle(gesture);
+const drawParticle = (all) => (particle) => {
+  const { angle, length, pt } = particle;
+  const bez = particle.pathForParticle(gesture);
   stroke(100, 0, 255);
   drawBez && bez && bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
-  stroke(255, 255, 255);
+  stroke(...particle.color);
   line(...pt, ...pointFrom(angle, length, pt));
-  all.push(newParticle);
+  all.push(particle);
 };
 
 let depth = 10;
@@ -25,6 +26,7 @@ let maxParticles = 100;
 let dragged = false;
 let freeze = false;
 let drawBez = false;
+let trace = false;
 function debugFx(all, thing) {
   const [call, vals, opts] = thing;
   // console.log(vals);
@@ -57,7 +59,7 @@ function draw() {
   stroke(255, 255, 100);
   strokeWeight(1);
 
-  background(0);
+  !trace && background(0);
 
   debug = debug.reduce(debugFx, []);
   strokeWeight(1);
@@ -96,6 +98,7 @@ function mouseReleased() {
   if (!dragged) {
     gesture = new GestureField(10);
     particles = [];
+    background(0);
   }
   dragged = false;
   // debug = [];
@@ -110,6 +113,10 @@ function keyPressed(params) {
   }
   if (key === "d") {
     drawBez = !drawBez;
+    return false;
+  }
+  if (key === "t") {
+    trace = !trace;
     return false;
   }
 }

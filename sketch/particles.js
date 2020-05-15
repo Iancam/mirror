@@ -10,6 +10,8 @@ class Particle {
     this.targetAngle = null;
     this.trajectory = null;
     this.t = undefined;
+    this.color = [Math.random() * 255, Math.random() * 255, 255];
+
     Object.assign(this, options);
   }
 
@@ -78,6 +80,7 @@ class Particle {
 
   update(gestureField) {
     const { angle, length, speed, pt } = this;
+
     if (this.t > this.steps) {
       this.clearTrajectory();
     }
