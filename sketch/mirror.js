@@ -7,10 +7,11 @@ function setup() {
 }
 
 const drawParticle = (particle) => {
-  const { angle, length, pt } = particle;
-  const bez = particle.pathForParticle(gesture);
+  const { angle, length, pt, trajectory } = particle;
   stroke(100, 0, 255);
-  drawBez && bez && bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
+  drawBez &&
+    trajectory &&
+    trajectory.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
   stroke(...particle.color);
   line(...pt, ...pointFrom(angle, length, pt));
 };
@@ -26,30 +27,6 @@ let dragged = false;
 let freeze = false;
 let drawBez = true;
 let trace = false;
-function debugFx(all, thing) {
-  const [call, vals, opts] = thing;
-  // console.log(vals);
-  const timedOut =
-    opts && opts.ttl && opts.tstamp && new Date() - opts.tstamp > opts.ttl;
-  if (timedOut) {
-    return all;
-  }
-  const op = {
-    p: (v, opts = { color: "yellow", weight: 10 }) => {
-      stroke(opts.color);
-      strokeWeight(opts.weight);
-      point(...v);
-    },
-    l: (v, opts = { color: "cyan", weight: 1 }) => {
-      strokeWeight(opts.weight);
-      stroke(opts.color);
-      line(...v);
-    },
-  }[call](vals, opts);
-  all.push(thing);
-  return all;
-  // point(...pt);
-}
 
 function draw() {
   if (freeze) {

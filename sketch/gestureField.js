@@ -1,4 +1,3 @@
-let ping = 0;
 class GestureField extends rbush {
   constructor(minDistance, range = 20) {
     super();

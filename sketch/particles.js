@@ -42,8 +42,8 @@ class Particle {
 
   clearTrajectory() {
     this.trajectory = null;
-    this.t = undefined;
-    this.steps = undefined;
+    this.t = 0;
+    // this.steps = undefined;
   }
 
   update(gestureField) {
@@ -57,7 +57,6 @@ class Particle {
 
     if (this.t > this.steps) {
       this.clearTrajectory();
-      console.log("cleared");
     }
 
     if (this.trajectory) {
