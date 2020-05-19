@@ -42,6 +42,19 @@ class GestureField extends rbush {
     const actualDistance = dist(...nearest[0].pt, ...pt);
     return actualDistance <= this.range ? nearest[0] : null;
   }
+  getIntersections(vector) {
+    let sect = this.getIntersection(vector);
+    const intersections = [];
+    let t = 0;
+    while (sect && t < 50) {
+      t++;
+      intersections.push(sect);
+      sect = this.getIntersection(sect);
+    }
+    intersections.length > 0 && console.log(intersections);
+
+    return intersections;
+  }
 
   distance(pt) {
     const nearest = knn(this, ...pt, 1);

@@ -6,14 +6,13 @@ function setup() {
   background(0);
 }
 
-const drawParticle = (all) => (particle) => {
+const drawParticle = (particle) => {
   const { angle, length, pt } = particle;
   const bez = particle.pathForParticle(gesture);
   stroke(100, 0, 255);
   drawBez && bez && bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
   stroke(...particle.color);
   line(...pt, ...pointFrom(angle, length, pt));
-  all.push(particle);
 };
 
 let depth = 10;
@@ -25,7 +24,7 @@ let maxParticles = 100;
 
 let dragged = false;
 let freeze = false;
-let drawBez = false;
+let drawBez = true;
 let trace = false;
 function debugFx(all, thing) {
   const [call, vals, opts] = thing;
@@ -76,11 +75,11 @@ function draw() {
     }
   });
   stroke(255, 255, 255);
-  particles = particles.reduce((all, particle) => {
-    const newParticles = particle.update(gesture);
-
-    newParticles.forEach(drawParticle(all));
-
+  particles = particles.reduce((all, oldParticle) => {
+    const particle = oldParticle.update(gesture);
+    if (!particle) return all;
+    drawParticle(particle);
+    all.push(particle);
     return all;
   }, []);
 }
