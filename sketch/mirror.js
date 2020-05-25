@@ -8,10 +8,17 @@ function setup() {
 
 const drawParticle = (particle) => {
   const { angle, length, pt, trajectory } = particle;
-  stroke(100, 0, 255);
-  drawBez &&
-    trajectory &&
-    trajectory.getLUT(20).forEach(({ x, y }) => circle(x, y, 2));
+  if (drawBez && trajectory.bezes) {
+    windowForEach(trajectory.pts, 2, ([p1, p2]) => line(...p1.pt, ...p2.pt));
+    stroke(100, 0, 255);
+
+    // trajectory.bezes.forEach((bez) =>
+    //   bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2))
+    // );
+    // trajectory.bezes.forEach((bez) =>
+    //   bez.points.forEach(({ x, y }) => rect(x - 5, y - 5, 5, 5))
+    // );
+  }
   stroke(...particle.color);
   line(...pt, ...pointFrom(angle, length, pt));
 };
@@ -21,7 +28,8 @@ let particles = [];
 let gestDist = 20;
 let gesture = new GestureField(gestDist);
 let debug = [];
-let maxParticles = 100;
+
+let maxParticles = 1;
 
 let dragged = false;
 let freeze = false;
@@ -48,7 +56,7 @@ function draw() {
   stroke("white");
   gesture.walls.forEach((wall) => {
     if (wall.length > 2) {
-      dWindow(wall, 2, ([p1, p2]) => line(...p1, ...p2));
+      windowForEach(wall, 2, ([p1, p2]) => line(...p1, ...p2));
     }
   });
   stroke(255, 255, 255);
@@ -66,7 +74,7 @@ function mouseDragged() {
   const pt = [mouseX, mouseY];
   const added = gesture.add(pt);
   if (typeof added.angle === "number" && particles.length < maxParticles) {
-    particles.push(new Particle(pt, added.angle));
+    particles.push(new Particle(pt, added.angle, gesture));
   }
 }
 

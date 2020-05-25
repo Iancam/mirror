@@ -7,6 +7,7 @@ class GestureField extends rbush {
     this.windowIndex = 0;
     this.count = 0;
     this.walls = [[], []];
+    this.listeners = [];
   }
   clearWindow() {
     this.window = [null, null, null];
@@ -31,6 +32,7 @@ class GestureField extends rbush {
       );
 
       this.count += 1;
+      this.listeners.forEach((cb) => cb(this));
       return newPoint;
     }
     return false;
@@ -41,6 +43,7 @@ class GestureField extends rbush {
     const actualDistance = dist(...nearest[0].pt, ...pt);
     return actualDistance <= this.range ? nearest[0] : null;
   }
+
   getIntersections(vector) {
     let sect = this.getIntersection(vector);
     const intersections = [];
@@ -50,8 +53,7 @@ class GestureField extends rbush {
       intersections.push(sect);
       sect = this.getIntersection(sect);
     }
-    intersections.length > 0 && console.log(intersections);
-
+    console.log(t, intersections, vector);
     return intersections;
   }
 
@@ -64,21 +66,34 @@ class GestureField extends rbush {
     return !!this.find(pt);
   }
 
+  register(cb) {
+    this.listeners.push(cb);
+  }
+
   getIntersection(vector) {
+    console.trace();
     const sectPts = this.walls
       .map((wall) => {
         if (wall.length < 2) return null;
         let ret = undefined;
-        dWindow(wall, 2, ([lst, curr]) => {
+        windowForEach(wall, 2, (wallSection) => {
+          const [lst, curr] = wallSection;
           if (ret) return;
-          const [a1, a2] = [lst, curr].map((pt) => getAngle(vector.pt, pt));
-          const ordered =
+          const [a1, a2] = wallSection.map((pt) => getAngle(vector.pt, pt));
+          const endpointAngles =
             shortestAngle(a1, a2) < shortestAngle(a2, a1) ? [a2, a1] : [a1, a2];
-          // console.log(ordered);
 
-          const between = isBetween(...ordered, vector.angle);
-          if (between) {
-            const pointer = pointFrom(vector.angle, 100, vector.pt);
+          const angleIntersectsLine = isBetween(
+            ...endpointAngles,
+            vector.angle
+          );
+
+          if (angleIntersectsLine) {
+            debug.push([
+              lineFromVector(vector, 10),
+              { color: "red", weight: 3 },
+            ]);
+            const pointer = pointFrom(vector.angle, 1000, vector.pt);
             const sectPt = intersect(...lst, ...curr, ...vector.pt, ...pointer);
 
             const surfaceAngle = getAngle(lst, curr);
