@@ -37,6 +37,10 @@ let drawBez = true;
 let trace = false;
 
 function draw() {
+  stroke(255, 255, 100);
+  strokeWeight(1);
+  textSize(9);
+  text(`${mouseX}, ${mouseY}`, mouseX, mouseY);
   if (freeze) {
     return;
   }
@@ -44,6 +48,10 @@ function draw() {
   strokeWeight(1);
 
   !trace && background(0);
+  stroke(255, 255, 100);
+  strokeWeight(1);
+  textSize(9);
+  text(`${mouseX}, ${mouseY}`, mouseX, mouseY);
 
   debug = debug.reduce(debugFx, []);
   strokeWeight(1);

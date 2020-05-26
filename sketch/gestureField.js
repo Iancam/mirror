@@ -113,9 +113,6 @@ class GestureField extends rbush {
         ? undefined
         : sectPts.reduce((min, curr) => {
             const distance = dist(...curr.pt, ...vector.pt);
-            if (distance < 0.5) {
-              return min;
-            }
             return min.distance > distance
               ? {
                   distance,
@@ -123,6 +120,17 @@ class GestureField extends rbush {
                 }
               : min;
           });
+    const d = closest && dist(...closest.pt, ...vector.pt);
+    closest && console.log({ vector, closest, d });
+    if (closest && d < 5) {
+      // handles a collision bug
+      console.log("nope");
+
+      return {
+        pt: pointFrom(vector.angle, 3, closest.pt),
+        angle: vector.angle,
+      };
+    }
     closest &&
       debug.push([lineFromVector(closest, 10), { color: "white", weight: 3 }]);
     return closest;
