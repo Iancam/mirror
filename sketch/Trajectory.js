@@ -41,7 +41,7 @@ class Trajectory {
 
   updatePath(gestureField) {
     const lst = last(this.pts);
-    debug.push([lineFromVector(lst, 20), { color: "cyan", weight: 3 }]);
+    debug.push([lineFromVector(lst, 20), { color: "cyan", weight: 2 }]);
     const sect = lst && gestureField.getIntersections(lst);
     lst && this.addIntersections(sect);
   }

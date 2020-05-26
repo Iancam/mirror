@@ -71,7 +71,6 @@ class GestureField extends rbush {
   }
 
   getIntersection(vector) {
-    console.trace();
     const sectPts = this.walls
       .map((wall) => {
         if (wall.length < 2) return null;
@@ -89,10 +88,6 @@ class GestureField extends rbush {
           );
 
           if (angleIntersectsLine) {
-            debug.push([
-              lineFromVector(vector, 10),
-              { color: "red", weight: 3 },
-            ]);
             const pointer = pointFrom(vector.angle, 1000, vector.pt);
             const sectPt = intersect(...lst, ...curr, ...vector.pt, ...pointer);
 
@@ -101,16 +96,26 @@ class GestureField extends rbush {
               pt: sectPt,
               angle: reflectAngle(vector.angle, surfaceAngle),
             };
+
+            debug.push([
+              lineFromVector(vector, 10),
+              { color: "red", weight: 5 },
+            ]);
           }
         });
+
         return ret;
       })
       .filter((pt) => pt && pt.pt);
+
     const closest =
       sectPts.length < 1
         ? undefined
         : sectPts.reduce((min, curr) => {
             const distance = dist(...curr.pt, ...vector.pt);
+            if (distance < 0.5) {
+              return min;
+            }
             return min.distance > distance
               ? {
                   distance,
@@ -118,6 +123,8 @@ class GestureField extends rbush {
                 }
               : min;
           });
+    closest &&
+      debug.push([lineFromVector(closest, 10), { color: "white", weight: 3 }]);
     return closest;
   }
 
