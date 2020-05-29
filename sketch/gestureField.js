@@ -53,7 +53,6 @@ class GestureField extends rbush {
       intersections.push(sect);
       sect = this.getIntersection(sect);
     }
-    console.log(t, intersections, vector);
     return intersections;
   }
 
@@ -97,10 +96,10 @@ class GestureField extends rbush {
               angle: reflectAngle(vector.angle, surfaceAngle),
             };
 
-            debug.push([
-              lineFromVector(vector, 10),
-              { color: "red", weight: 5 },
-            ]);
+            // debug.push([
+            //   lineFromVector(vector, 10),
+            //   { color: "red", weight: 5 },
+            // ]);
           }
         });
 
@@ -121,7 +120,7 @@ class GestureField extends rbush {
               : min;
           });
     const d = closest && dist(...closest.pt, ...vector.pt);
-    closest && console.log({ vector, closest, d });
+    // closest && console.log({ vector, closest, d });
     if (closest && d < 5) {
       // handles a collision bug
       console.log("nope");
@@ -131,8 +130,8 @@ class GestureField extends rbush {
         angle: vector.angle,
       };
     }
-    closest &&
-      debug.push([lineFromVector(closest, 10), { color: "white", weight: 3 }]);
+    // closest &&
+    //   debug.push([lineFromVector(closest, 10), { color: "white", weight: 3 }]);
     return closest;
   }
 

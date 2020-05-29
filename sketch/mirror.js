@@ -9,13 +9,13 @@ function setup() {
 const drawParticle = (particle) => {
   const { angle, length, pt, trajectory } = particle;
   if (drawBez && trajectory.bezes) {
-    windowForEach(trajectory.pts, 2, ([p1, p2]) => line(...p1.pt, ...p2.pt));
-    stroke(100, 0, 255);
+    // windowForEach(trajectory.pts, 2, ([p1, p2]) => line(...p1.pt, ...p2.pt));
+    stroke(100, 255, 255);
 
-    // trajectory.bezes.forEach((bez) =>
+    // trajectory.bezes.forEach(({ bez }) =>
     //   bez.getLUT(20).forEach(({ x, y }) => circle(x, y, 2))
     // );
-    // trajectory.bezes.forEach((bez) =>
+    // trajectory.bezes.forEach(({ bez }) =>
     //   bez.points.forEach(({ x, y }) => rect(x - 5, y - 5, 5, 5))
     // );
   }
@@ -82,7 +82,7 @@ function mouseDragged() {
   const pt = [mouseX, mouseY];
   const added = gesture.add(pt);
   if (typeof added.angle === "number" && particles.length < maxParticles) {
-    particles.push(new Particle(pt, added.angle, gesture));
+    particles.push(new Particle(pt, added.angle, gesture, { speed: 2 }));
   }
 }
 

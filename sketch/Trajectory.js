@@ -11,28 +11,16 @@ class Trajectory {
         },
       ];
       this.addIntersections(gesture.getIntersections(vector));
-
-      this.bezIndex = -1;
       this.bezes = [];
-      this.bez = undefined;
+      this.bezIndex = 0;
       this.step();
     }
   }
 
   addIntersections(intersections) {
+    const oldLen = this.pts.length;
     this.pts = this.pts.concat(intersections);
-    const [_, distance] =
-      this.pts.length < 2
-        ? [null, null]
-        : this.pts.reduce(
-            ([lst, summ], { pt }) => {
-              summ += lst ? dist(...lst, ...pt) : 0;
-              return [pt, summ];
-            },
-            [undefined, 0]
-          );
-
-    this.steps = Math.floor(distance / this.speed);
+    if (this.pts.length > oldLen) this.updateBezes();
   }
 
   register() {
@@ -41,7 +29,7 @@ class Trajectory {
 
   updatePath(gestureField) {
     const lst = last(this.pts);
-    debug.push([lineFromVector(lst, 20), { color: "cyan", weight: 2 }]);
+    // debug.push([lineFromVector(lst, 20), { color: "cyan", weight: 2 }]);
     const sect = lst && gestureField.getIntersections(lst);
     lst && this.addIntersections(sect);
   }
@@ -62,7 +50,9 @@ class Trajectory {
       const pts = withMidpoints
         .slice(i - 3, i)
         .reduce((all, pt) => all.concat(pt), []);
-      this.bezes.push(new Bezier(...pts));
+      const bez = new Bezier(...pts);
+      const steps = Math.floor(bez.length() / this.speed);
+      this.bezes.push({ bez, steps });
     }
   }
 
@@ -74,23 +64,22 @@ class Trajectory {
   }
 
   step() {
-    if (!this.steps) {
+    if (this.bezes.length < 1 || this.bezIndex >= this.bezes.length) {
       return null;
     }
-    this.updateBezes();
-    //
-    const index = this.t++ / this.steps;
-    const bezTime = index % 1;
-    const bezIndex = Math.floor(index);
-
-    if (this.bezes[bezIndex]) {
-      const { x, y } = this.bezes[bezIndex].get(bezTime);
-      return [x, y];
+    const { bez, steps } = this.bezes[this.bezIndex];
+    if (this.t > steps) {
+      this.t = this.t - steps;
+      this.bezIndex += 1;
     }
+    // console.log(this.bezes);
+
+    const { x, y } = bez.get((this.t += 1) / steps);
+    return [x, y];
   }
 
   getLUT(...args) {
-    return this.bez.getLUT(...args);
+    return this.bezes[this.bezIndex].getLUT(...args);
   }
 
   length() {

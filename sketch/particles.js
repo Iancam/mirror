@@ -4,7 +4,8 @@ let startLife = 90;
 const deathDist = 100;
 
 class Particle {
-  constructor(pt, angle, gesture, options = { length: 5, speed: 2 }) {
+  constructor(pt, angle, gesture, options) {
+    const defaultOptions = { length: 5, speed: 2 };
     this.pt = pt;
     this.angle = angle < 0 ? 360 + angle : angle > 360 ? angle % 360 : angle;
     this.trajectory = new Trajectory(this, options.speed, gesture);
@@ -12,7 +13,7 @@ class Particle {
     this.t = 0;
     this.color = [Math.random() * 255, Math.random() * 255, 255];
 
-    Object.assign(this, options);
+    Object.assign(this, { ...defaultOptions, ...options });
   }
 
   update(gesture) {
